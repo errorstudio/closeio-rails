@@ -25,6 +25,32 @@ It's often useful to create and update custom fields in Close.io programatically
 ### `Closeio::Rails::Note`
 This is a very lightweight wrapper around Close::Client#create_note.
 
+## Configuration
+Configure the gem in an initializer like this:
+
+```
+   Rails.application.config.to_prepare do
+     Closeio::Rails.configure do |config|
+         config.api_key = 'your key' #or put in Rails secrets, or somewhere else
+         config.verbose = false
+     end
+   end
+```
+
+You can add your own methods into the Closeio::Rails models by including them in your initializer like this:
+
+```
+    # Leadmethods and ContactMethods are modules in your Rails project. Obviously they could be namespaced, etc.
+     Closeio::Rails::Lead.send(:include, LeadMethods)
+     Closeio::Rails::Contact.send(:prepend, ContactMethods)
+```
+
+You might want to add actions to the webhooks controller, too. Sometimes we use this on applications with some sort of authentication defined in `ApplicationController`, which needs to be ignored on the webhooks controller:
+
+```
+     Closeio::Rails::WebhooksController.send(:skip_before_action, :authenticate_user!)
+     Closeio::Rails::WebhooksController.send(:skip_after_action, :verify_authorized)
+```
 
 ## Mountable webhooks controller
 It's useful to receive webhooks from Close.io. You have to drop a note to their support team to set it up but it's very quick.
