@@ -44,6 +44,27 @@ webhooks POST /webhooks(.:format)       closeio/rails/webhooks#create {:format=>
 
 The `debug_webhooks_path` only works in development. It just sanity-checks that you've got ot mounted properly :)
 
+### Consuming webhooks in your application
+The controller doesn't do anything when it receives a webhook - instead it uses ActiveSupport::Notifications to allow you to subscribe to the raised events to do what you need to. Here's an example:
+
+```
+ActiveSupport::Notifications.subscribe(/closeio\.(create|update|delete)/) do |name, start, finish, id, payload|
+  if payload[:model] == 'lead'
+    SomeLeadRelatedJob.perform_later payload[:data][:id]
+  end
+end
+```
+
+Check the Close.io docs to get a sense of what you get in the payload - one important thing to nose is that when you get a 'closeio.merge' notification, you don't get an ID, you'll get a `:source_id` and a `:destination_id`.
+
+Importantly, if you're using ActiveJob with the `inline` strategy you'll need to make sure you rescue from any failures, or the controller won't return a 200 OK and Close.io will keep retrying.
+
+# Contributing
+Pull requests welcome. The usual drill: fork, commit changes, PR.
+
+# Licence
+MIT - see LICENCE.txt.
+
 
       
 
