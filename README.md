@@ -2,7 +2,7 @@
 A handy wrapper around the `closeio` gem to make Rails integration a little easier.
 
 ## Models
-There are 4 models defined in this gem. The aim is to have a DSL a little more like the familiar ActiveRecord one. 
+There are 5 models defined in this gem. The aim is to have a DSL a little more like the familiar ActiveRecord one. 
 
 ### `Closeio::Rails::Base`
 All the models inherit from `Closeio::Rails::Base`, which has a couple of mixins:
@@ -24,6 +24,9 @@ It's often useful to create and update custom fields in Close.io programatically
  
 ### `Closeio::Rails::Note`
 This is a very lightweight wrapper around Close::Client#create_note.
+
+### `Closeio::Rails::Webhook`
+A similarly lightweight wrapper around Closeio::Client#create_webhook
 
 ## Configuration
 Configure the gem in an initializer like this:
@@ -69,6 +72,48 @@ webhooks POST /webhooks(.:format)       closeio/rails/webhooks#create {:format=>
 ```
 
 The `debug_webhooks_path` only works in development. It just sanity-checks that you've got ot mounted properly :)
+
+## Adding webhooks - rake tasks
+There are 3 rake tasks which are available to use in your application:
+
+### `rake closeio:rails:list_webhooks`
+Give you a list of webhooks with their ID and endpoint
+
+### `rake closeio:rails:create_lead_webhook[endpoint_url]`
+Sets up a webhook to track leads. Pass in an endpoint URL.
+
+### `rake closeio:rails:destroy_webhook[id]`
+Pass in the ID you got from `rake closeio:rails:list_webhooks` to destroy a webhook and no longer receive messages to that endpoint.
+
+## Adding other webhooks
+You can add other webhooks with different subscriptions by calling `Close::Rails::Webhook.create(params)` where params is a hash which looks like this:
+
+```
+Closeio::Rails::Webhook.create({
+        url: url,
+        events: [
+          {
+            object_type: 'lead',
+            action: 'created'
+          },
+          {
+            object_type: 'lead',
+            action: 'updated'
+          },
+          {
+            object_type: 'lead',
+            action: 'deleted'
+          },
+          {
+            object_type: 'lead',
+            action: 'merged'
+          }
+        ]
+       })
+    end
+```
+
+See [the docs](https://developer.close.com/#webhooks) for more details.
 
 ### Consuming webhooks in your application
 The controller doesn't do anything when it receives a webhook - instead it uses ActiveSupport::Notifications to allow you to subscribe to the raised events to do what you need to. Here's an example:

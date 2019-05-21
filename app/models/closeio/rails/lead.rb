@@ -4,13 +4,13 @@ module Closeio
       attr_reader :contacts
 
       def self.all
-        Closeio::Rails.configuration.client.list_leads("*", per_page: 99999).data.collect do |lead|
+        Closeio::Rails.configuration.client.list_leads("*", paginate: true)[:data].collect do |lead|
           self.new(lead.to_hash)
         end
       end
 
       def self.with_status(status)
-        Closeio::Rails.configuration.client.list_leads("lead_status: #{status}", per_page: 99999).data.collect do |lead|
+        Closeio::Rails.configuration.client.list_leads("lead_status: #{status}", paginate: true)[:data].collect do |lead|
           self.new(lead.to_hash)
         end
       end
