@@ -12,7 +12,8 @@ module Closeio
 
       def create
         request.format = :json
-        ActiveSupport::Notifications.instrument("closeio.#{params[:action]}", params)
+        event = params[:event]
+        ActiveSupport::Notifications.instrument("closeio.#{event[:action]}", event)
 
         #must return an ok - check Rails version to determine whether to return nothing or head response.
         if ::Rails.version =~ /^4/
