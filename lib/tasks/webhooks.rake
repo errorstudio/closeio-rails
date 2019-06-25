@@ -29,6 +29,18 @@ namespace :closeio do
           {
             object_type: 'lead',
             action: 'merged'
+          },
+          {
+            object_type: 'contact',
+            action: 'created'
+          },
+          {
+            object_type: 'contact',
+            action: 'updated'
+          },
+          {
+            object_type: 'contact',
+            action: 'deleted'
           }
         ]
                                    })
